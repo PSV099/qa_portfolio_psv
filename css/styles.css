@@ -1049,10 +1049,12 @@ body.dark-mode .project-tools h5 {
 }
 
 .ratio-percent {
-    display: block;
+    display: none !important;
     font-size: 1.2rem;
     font-weight: 800;
 }
+
+/* percentages hidden as per updated portfolio requirements */
 
 .ratio-breakdown {
     display: flex;
@@ -2171,6 +2173,16 @@ body.dark-mode .certificate-bullets li::before {
     padding-left: 2.3rem;
 }
 
+/* Description under certificates heading (mobile view) */
+.cert-desc {
+    margin-top: 0.5rem;
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+}
+body.dark-mode .cert-desc {
+    color: var(--text-secondary-dark);
+}
+
 .certificate-visual {
     display: flex;
     align-items: center;
@@ -2252,6 +2264,7 @@ body.dark-mode .carousel-nav:hover {
     .carousel-nav {
         width: 40px;
         height: 40px;
+        display: none; /* hide nav arrows on narrow screens */
     }
 
     .carousel-nav svg {
@@ -2261,6 +2274,30 @@ body.dark-mode .carousel-nav:hover {
 
     .certificates-carousel-container {
         gap: 1rem;
+    }
+
+    /* Mobile horizontal scroll for certificate cards */
+    .certificates-carousel {
+        display: flex;
+        overflow-x: auto;
+        scroll-snap-type: x mandatory;
+        -webkit-overflow-scrolling: touch;
+        min-height: auto;
+    }
+    .certificates-carousel::-webkit-scrollbar {
+        display: none;
+    }
+    .certificates-carousel {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+    }
+    .certificate-slide {
+        position: relative !important;
+        transform: none !important;
+        opacity: 1 !important;
+        flex: 0 0 85%;
+        scroll-snap-align: start;
+        margin-right: 1rem;
     }
 }
 
