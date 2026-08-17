@@ -19,6 +19,172 @@
             localStorage.setItem('darkMode', nowDark);
         });
     }
+
+    // ===== Recruiter-Focused QA Mindset =====
+    const qaMindset = document.querySelector('.qa-mindset');
+    const mindsetPhrase = qaMindset?.querySelector('.qa-mindset__phrase');
+    const mindsetPhrases = [
+        'Quality Ownership',
+        'Attention to Detail',
+        'Critical Thinking',
+        'Clear Communication',
+        'User-Focused Testing',
+        'Problem Solving'
+    ];
+    if (qaMindset && mindsetPhrase && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        let phraseIndex = 0;
+        let characterIndex = 0;
+        let deleting = false;
+        function rotateMindset() {
+            const current = mindsetPhrases[phraseIndex];
+            mindsetPhrase.textContent = current.slice(0, characterIndex);
+            if (!deleting && characterIndex < current.length) {
+                characterIndex += 1;
+                setTimeout(rotateMindset, 42);
+            } else if (!deleting) {
+                qaMindset.setAttribute('aria-label', `QA Mindset: ${current}`);
+                deleting = true;
+                setTimeout(rotateMindset, 2100);
+            } else if (characterIndex > 0) {
+                characterIndex -= 1;
+                setTimeout(rotateMindset, 24);
+            } else {
+                deleting = false;
+                phraseIndex = (phraseIndex + 1) % mindsetPhrases.length;
+                setTimeout(rotateMindset, 250);
+            }
+        }
+        mindsetPhrase.textContent = '';
+        rotateMindset();
+    }
+
+    // Editable portfolio presentation data.
+    const skillProficiencies = {
+        'AI Testing': 100,
+        'Manual Testing': 100,
+        'Automation Testing': 80,
+        'API Testing': 80,
+        'Mobile Testing': 75,
+        'Database / SQL': 65,
+        'CI/CD': 70
+    };
+    const projectMetrics = {
+        campus: ['95% Regression Coverage', '150+ Test Scenarios'],
+        one: ['120+ Test Cases', '30% Faster Regression'],
+        internal: ['20+ AI Workflows Tested', 'Chatbot + CMS Validation']
+    };
+
+    document.querySelectorAll('[data-project-metrics]').forEach(container => {
+        const metrics = projectMetrics[container.dataset.projectMetrics] || [];
+        container.replaceChildren(...metrics.map(metric => {
+            const badge = document.createElement('span');
+            badge.className = 'project-metric';
+            badge.textContent = metric;
+            return badge;
+        }));
+    });
+
+    const skillsSection = document.querySelector('#skills');
+    const skillItems = skillsSection ? skillsSection.querySelectorAll('.proficiency-item') : [];
+    skillItems.forEach(item => {
+        const fill = item.querySelector('[data-proficiency]');
+        const value = item.querySelector('.proficiency-value');
+        const target = skillProficiencies[fill.dataset.proficiency];
+        fill.style.setProperty('--proficiency', `${target}%`);
+        value.dataset.target = target;
+    });
+
+    function animateSkillValue(element, target) {
+        const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        if (reduceMotion) { element.textContent = `${target}%`; return; }
+        const duration = 1000;
+        const started = performance.now();
+        function update(now) {
+            const progress = Math.min((now - started) / duration, 1);
+            element.textContent = `${Math.round(progress * target)}%`;
+            if (progress < 1) requestAnimationFrame(update);
+        }
+        requestAnimationFrame(update);
+    }
+
+    if (skillsSection && skillItems.length) {
+        const skillsObserver = new IntersectionObserver(entries => {
+            if (!entries[0].isIntersecting) return;
+            const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+            skillItems.forEach((item, index) => {
+                setTimeout(() => {
+                    item.classList.add('is-animated');
+                    animateSkillValue(item.querySelector('.proficiency-value'), Number(item.querySelector('.proficiency-value').dataset.target));
+                }, reduceMotion ? 0 : index * 100);
+            });
+            skillsObserver.unobserve(skillsSection);
+        }, { threshold: 0.2 });
+        skillsObserver.observe(skillsSection);
+    }
+
+    // ===== Interactive QA Testing Distribution =====
+    const testingDistribution = document.querySelector('[data-testing-distribution]');
+    if (testingDistribution) {
+        const testingAreas = [
+            { category: 'Manual Testing', chartValue: 1, metric: '500+ Test Cases', points: ['Functional Testing', 'Regression Testing', 'End-to-End Testing'], color: '#2563eb' },
+            { category: 'Automation Testing', chartValue: 1, metric: '40% Regression Improvement', points: ['Playwright + JavaScript', 'Selenium Automation', 'POM-Based Automation'], color: '#4f46e5' },
+            { category: 'Mobile App Testing', chartValue: 1, metric: '6 Mobile Releases', points: ['Android & iOS Testing', 'Emulator Testing', 'ADB Validation'], color: '#0f766e' },
+            { category: 'API Testing', chartValue: 1, metric: '120+ APIs Validated', points: ['Postman API Testing', 'REST Assured', 'Response Validation'], color: '#475569' },
+            { category: 'AI Testing', chartValue: 1, metric: '20+ AI Workflows Tested', points: ['Chatbot Testing', 'CMS Tool Testing', 'AI Workflow Validation'], color: '#7c3aed' },
+            { category: 'Database / SQL Testing', chartValue: 1, metric: '200+ Data Validations', points: ['SQL Data Validation', 'Backend Testing', 'API-DB Verification'], color: '#0369a1' }
+        ];
+        const svg = testingDistribution.querySelector('.donut-svg');
+        const legend = testingDistribution.querySelector('.testing-legend');
+        const tooltip = testingDistribution.querySelector('.donut-tooltip');
+        const centerTitle = testingDistribution.querySelector('.donut-center__title');
+        const centerMetric = testingDistribution.querySelector('.donut-center__metric');
+        const insight = testingDistribution.querySelector('.testing-insight');
+        const insightTitle = insight.querySelector('.testing-insight__title');
+        const insightMetric = insight.querySelector('.testing-insight__metric');
+        const insightPoints = insight.querySelector('.testing-insight__points');
+        const radius = 86;
+        const circumference = 2 * Math.PI * radius;
+        const segmentLength = circumference / testingAreas.length;
+
+        testingAreas.forEach((area, index) => {
+            const segment = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+            segment.setAttribute('class', 'donut-segment');
+            segment.setAttribute('cx', '120'); segment.setAttribute('cy', '120'); segment.setAttribute('r', radius);
+            segment.setAttribute('fill', 'none'); segment.setAttribute('stroke', area.color);
+            segment.setAttribute('stroke-dasharray', `${segmentLength} ${circumference - segmentLength}`);
+            segment.setAttribute('stroke-dashoffset', String(-index * segmentLength));
+            segment.setAttribute('stroke-width', '30'); segment.setAttribute('tabindex', '0');
+            segment.setAttribute('role', 'button'); segment.setAttribute('aria-label', `${area.category}: ${area.metric}`);
+            segment.dataset.index = index;
+            svg.appendChild(segment);
+            const item = document.createElement('button');
+            item.type = 'button'; item.className = 'testing-legend__button'; item.style.setProperty('--legend-color', area.color);
+            item.innerHTML = `<span class="testing-legend__dot"></span><span>${area.category}</span>`;
+            item.setAttribute('aria-label', `Show ${area.category} insight`); item.dataset.index = index;
+            legend.appendChild(item);
+        });
+
+        function selectArea(index) {
+            const area = testingAreas[index];
+            svg.querySelectorAll('.donut-segment').forEach((segment, i) => segment.classList.toggle('is-selected', i === index));
+            legend.querySelectorAll('.testing-legend__button').forEach((button, i) => {
+                button.classList.toggle('is-selected', i === index);
+                button.setAttribute('aria-pressed', String(i === index));
+            });
+            centerTitle.textContent = area.category;
+            centerMetric.textContent = area.metric;
+            insight.style.setProperty('--insight-color', area.color);
+            insightTitle.textContent = area.category;
+            insightMetric.textContent = area.metric;
+            insightPoints.replaceChildren(...area.points.map(point => { const li = document.createElement('li'); li.textContent = point; return li; }));
+        }
+        function showTooltip(index) { const area = testingAreas[index]; tooltip.textContent = `${area.category}: ${area.metric}`; tooltip.hidden = false; }
+        function hideTooltip() { tooltip.hidden = true; }
+        testingDistribution.addEventListener('click', event => { const target = event.target.closest('[data-index]'); if (target) selectArea(Number(target.dataset.index)); });
+        testingDistribution.addEventListener('pointerover', event => { const target = event.target.closest('.donut-segment'); if (target) showTooltip(Number(target.dataset.index)); });
+        testingDistribution.addEventListener('pointerout', event => { if (event.target.closest('.donut-segment')) hideTooltip(); });
+        svg.addEventListener('keydown', event => { const target = event.target.closest('.donut-segment'); if (target && (event.key === 'Enter' || event.key === ' ')) { event.preventDefault(); selectArea(Number(target.dataset.index)); } });
+    }
     
     // ===== Scroll to Top Button =====
     const scrollToTopBtn = document.getElementById('scroll-to-top');
